@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "anixart_playlist_extractor"
+version = "0.1.0"
+authors = ["Greateapot <greateapot998@gmail.com>"]
+description = 'Anixart Playlist Extractor'
+classifiers = [
+    "Environment :: Console",
+    "Programming Language :: Python :: 3.12",
+    "Typing :: Typed",
+]
+packages = [{ include = "anixart_playlist_extractor", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+click = "^8.1.3"
+requests = "^2.32.3"
+
+[tool.poetry.scripts]
+axapex = "anixart_playlist_extractor.cli:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0", "setuptools", "wheel"]
+build-backend = "poetry.core.masonry.api"
