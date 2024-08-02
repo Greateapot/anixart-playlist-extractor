@@ -2,6 +2,7 @@ from pathlib import Path
 import click
 
 from anixart_playlist_extractor import Quality, extract_playlist
+from anixart_playlist_extractor.cli.options import ListOption
 
 
 @click.command(
@@ -21,6 +22,22 @@ from anixart_playlist_extractor import Quality, extract_playlist
     required=True,
     help="Type ID",
     type=click.INT,
+)
+@click.option(
+    "-L",
+    "--extract-last",
+    show_default=True,
+    default=False,
+    help="Extract only last episode",
+    is_flag=True,
+)
+@click.option(
+    "-O",
+    "--extract-only",
+    show_default=True,
+    default=None,
+    help="Extract only provided positions (starts with 1; ignored with --last option)",
+    cls=ListOption,
 )
 @click.option(
     "-q",
@@ -44,12 +61,16 @@ from anixart_playlist_extractor import Quality, extract_playlist
 def command_extract(
     release_id: int,
     type_id: int,
+    extract_only: list[int] | None,
+    extract_last: bool | None,
     quality: Quality,
     output_dir: Path,
 ):
     extract_playlist(
         release_id,
         type_id,
+        extract_only=extract_only,
+        extract_last=extract_last,
         quality=Quality(quality),
         output_dir=str(output_dir),
     )

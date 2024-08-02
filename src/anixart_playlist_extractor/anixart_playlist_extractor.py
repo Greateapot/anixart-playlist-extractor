@@ -64,6 +64,8 @@ class AnixartPlaylistExtractor:
         release_id: int,
         type_id: int,
         *,
+        extract_only: list[int] | None = None,
+        extract_last: bool | None = None,
         quality: Quality = Quality.q720,
         output_dir: str = "output",
     ) -> None:
@@ -90,16 +92,27 @@ class AnixartPlaylistExtractor:
 
         self.assert_code(content)
 
+        episodes = (
+            content["episodes"][-1:]
+            if extract_last
+            else filter(
+                lambda episode: episode["position"] in extract_only,
+                content["episodes"],
+            )
+            if extract_only
+            else content["episodes"]
+        )
+
         links = dict(
-            [
-                self.get_video_link(
+            map(
+                lambda episode: self.get_video_link(
                     release_id,
                     source_id,
                     episode["position"],
                     quality=quality,
-                )
-                for episode in content["episodes"]
-            ]
+                ),
+                episodes,
+            )
         )
 
         os.makedirs(output_dir, exist_ok=True)
@@ -116,12 +129,16 @@ def extract_playlist(
     release_id: int,
     type_id: int,
     *,
+    extract_only: list[int] | None = None,
+    extract_last: bool | None = None,
     quality: Quality = Quality.q720,
     output_dir: str = "output",
 ) -> None:
     AnixartPlaylistExtractor().extract_playlist(
         release_id=release_id,
         type_id=type_id,
+        extract_only=extract_only,
+        extract_last=extract_last,
         quality=quality,
         output_dir=output_dir,
     )
