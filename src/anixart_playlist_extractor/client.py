@@ -1,7 +1,14 @@
-import json
-import typing
+from pydantic import BaseModel, ValidationError
+from requests import Session
 
-import requests
+from anixart_playlist_extractor.models import (
+    EpisodeResponse,
+    EpisodeSourcesResponse,
+    EpisodeTypesResponse,
+    EpisodesResponse,
+    ReleaseResponse,
+    VideoLinksResponse,
+)
 
 ANIXART_URL = "api.anixart.tv"
 ANIXART_USER_AGENT = (
@@ -24,11 +31,9 @@ KODIK_HEADERS = {"User-Agent": KODIK_USER_AGENT}
 class Client:
     def __init__(
         self,
-        session: requests.Session = None,
+        session: Session = None,
     ) -> None:
-        self.session: requests.Session = (
-            session if session is not None else requests.Session()
-        )
+        self.session: Session = session if session is not None else Session()
 
     def __enter__(self):
         return self
@@ -36,26 +41,28 @@ class Client:
     def __exit__(self, exception_type, exception_value, exception_traceback):
         self.session.close()
 
-    def request(
+    def request[ResponseModel: BaseModel](
         self,
         url: str,
+        response_model: ResponseModel,
         *,
-        params: dict[str, str] = None,
         headers: dict[str, str] = None,
-    ) -> dict[str, typing.Any]:
+        params: dict[str, str] = None,
+    ) -> ResponseModel:
         resp = self.session.get(
             url,
-            params=params,
             headers=headers,
+            params=params,
         )
 
         if resp.status_code != 200:
-            raise Exception(
-                f"Req {url} ends with status code: "
-                f"{resp.status_code}; content: {resp.content.decode()}"
-            )
+            raise Exception(f"Req {url} ends with status code: {resp.status_code}")
 
-        return json.loads(resp.content)
+        try:
+            return response_model.model_validate_json(resp.content)
+        except ValidationError:
+            print(resp.content)
+            raise
 
     def release(
         self,
@@ -63,32 +70,59 @@ class Client:
         *,
         host: str = ANIXART_URL,
         headers: dict[str, str] = ANIXART_HEADERS,
-    ) -> dict[str, typing.Any]:
+    ) -> ReleaseResponse:
         return self.request(
             f"https://{host}/release/{release_id}",
-            params={"extended_mode": True},
+            ReleaseResponse,
+            headers=headers,
+            params={
+                "extended_mode": True,
+            },
+        )
+
+    def episode_types(
+        self,
+        release_id: int,
+        *,
+        host: str = ANIXART_URL,
+        headers: dict[str, str] = ANIXART_HEADERS,
+    ) -> EpisodeTypesResponse:
+        return self.request(
+            f"https://{host}/episode/{release_id}",
+            EpisodeTypesResponse,
+            headers=headers,
+        )
+
+    def episode_sources(
+        self,
+        release_id: int,
+        type_id: int,
+        *,
+        host: str = ANIXART_URL,
+        headers: dict[str, str] = ANIXART_HEADERS,
+    ) -> EpisodeSourcesResponse:
+        return self.request(
+            f"https://{host}/episode/{release_id}/{type_id}",
+            EpisodeSourcesResponse,
+            headers=headers,
+        )
+
+    def episodes(
+        self,
+        release_id: int,
+        type_id: int,
+        source_id: int,
+        *,
+        host: str = ANIXART_URL,
+        headers: dict[str, str] = ANIXART_HEADERS,
+    ) -> EpisodesResponse:
+        return self.request(
+            f"https://{host}/episode/{release_id}/{type_id}/{source_id}",
+            EpisodesResponse,
             headers=headers,
         )
 
     def episode(
-        self,
-        release_id: int,
-        *,
-        type_id: int = None,
-        source_id: int = None,
-        host: str = ANIXART_URL,
-        headers: dict[str, str] = ANIXART_HEADERS,
-    ) -> dict[str, typing.Any]:
-        return self.request(
-            f"https://{host}/episode/{release_id}"
-            if type_id is None
-            else f"https://{host}/episode/{release_id}/{type_id}"
-            if source_id is None
-            else f"https://{host}/episode/{release_id}/{type_id}/{source_id}",
-            headers=headers,
-        )
-
-    def episode_target(
         self,
         release_id: int,
         source_id: int,
@@ -96,9 +130,10 @@ class Client:
         *,
         host: str = ANIXART_URL,
         headers: dict[str, str] = ANIXART_HEADERS,
-    ) -> dict[str, typing.Any]:
+    ) -> EpisodeResponse:
         return self.request(
             f"https://{host}/episode/target/{release_id}/{source_id}/{position}",
+            EpisodeResponse,
             headers=headers,
         )
 
@@ -112,9 +147,10 @@ class Client:
         p: str = KODIK_UNKNOWN_PARAM,
         host: str = KODIK_URL,
         headers: dict[str, str] = KODIK_HEADERS,
-    ) -> dict[str, typing.Any]:
+    ) -> VideoLinksResponse:
         return self.request(
             f"http://{host}/api/video-links",
+            VideoLinksResponse,
             headers=headers,
             params={
                 "p": p,
