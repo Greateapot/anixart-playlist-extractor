@@ -18,11 +18,11 @@ class Playlist(BaseModel):
 
 class Related(BaseModel):
     id: int
-    name: str
-    description: str
-    image: str
+    name: str | None
+    description: str | None
+    image: str | None
     images: Any  # TODO: obtain real type (list[str])
-    name_ru: str
+    name_ru: str | None
     release_count: int
 
 
@@ -97,7 +97,7 @@ class Release(BaseModel):
     category: Category | int  # NOTE: jackson feature
     rating: int
     grade: float
-    status: Status | int  # NOTE: jackson feature
+    status: Status | None | int  # NOTE: jackson feature
     duration: int
     season: int
     broadcast: int
@@ -197,6 +197,15 @@ class Links(BaseModel):
     field_720: LinksField = Field(..., alias="720")
 
 
+class EpisodeUpdate(BaseModel):
+    last_episode_update_date: int
+    last_episode_update_name: str
+    last_episode_source_update_id: int
+    last_episode_source_update_name: str
+    last_episode_type_update_id: int
+    lastEpisodeTypeUpdateName: str
+
+
 class AnixartResponse(BaseModel):
     code: int
 
@@ -225,6 +234,17 @@ class VideoLinksResponse(BaseModel):
     links: Links
 
 
+class EpisodeUpdatesResponse(AnixartResponse):
+    content: list[EpisodeUpdate]
+    total_count: int
+    total_page_count: int
+    current_page: int
+
+
+class TypeAllResponse(AnixartResponse):
+    types: list[Type]
+
+
 def model_validate_json[ModelType: BaseModel](
     model_type: ModelType,
     json_data: str | bytes | bytearray,
@@ -248,6 +268,7 @@ __all__ = (
     Episode,
     LinksField,
     Links,
+    EpisodeUpdate,
     # Responses
     AnixartResponse,
     ReleaseResponse,
@@ -256,6 +277,8 @@ __all__ = (
     EpisodesResponse,
     EpisodeResponse,
     VideoLinksResponse,
+    EpisodeUpdatesResponse,
+    TypeAllResponse,
     # functions
     model_validate_json,
 )

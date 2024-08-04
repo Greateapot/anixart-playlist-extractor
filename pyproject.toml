@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "anixart_playlist_extractor"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Greateapot <greateapot998@gmail.com>"]
 description = 'Anixart Playlist Extractor'
 classifiers = [

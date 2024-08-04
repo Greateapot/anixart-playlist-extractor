@@ -5,8 +5,10 @@ from anixart_playlist_extractor.models import (
     EpisodeResponse,
     EpisodeSourcesResponse,
     EpisodeTypesResponse,
+    EpisodeUpdatesResponse,
     EpisodesResponse,
     ReleaseResponse,
+    TypeAllResponse,
     VideoLinksResponse,
 )
 
@@ -61,10 +63,11 @@ class Client:
         try:
             return response_model.model_validate_json(resp.content)
         except ValidationError:
-            print(resp.content)
+            with open("errbody.json", "wb") as file:
+                file.write(resp.content)
             raise
 
-    def release(
+    def get_release(
         self,
         release_id: int,
         *,
@@ -80,7 +83,7 @@ class Client:
             },
         )
 
-    def episode_types(
+    def get_episode_types(
         self,
         release_id: int,
         *,
@@ -93,7 +96,7 @@ class Client:
             headers=headers,
         )
 
-    def episode_sources(
+    def get_episode_sources(
         self,
         release_id: int,
         type_id: int,
@@ -107,7 +110,7 @@ class Client:
             headers=headers,
         )
 
-    def episodes(
+    def get_episodes(
         self,
         release_id: int,
         type_id: int,
@@ -122,7 +125,7 @@ class Client:
             headers=headers,
         )
 
-    def episode(
+    def get_episode(
         self,
         release_id: int,
         source_id: int,
@@ -137,7 +140,33 @@ class Client:
             headers=headers,
         )
 
-    def video_links(
+    def get_episode_updates(
+        self,
+        release_id: int,
+        *,
+        page: int = 0,
+        host: str = ANIXART_URL,
+        headers: dict[str, str] = ANIXART_HEADERS,
+    ) -> EpisodeUpdatesResponse:
+        return self.request(
+            f"https://{host}/episode/updates/{release_id}/{page}",
+            EpisodeUpdatesResponse,
+            headers=headers,
+        )
+
+    def get_type_all(
+        self,
+        *,
+        host: str = ANIXART_URL,
+        headers: dict[str, str] = ANIXART_HEADERS,
+    ) -> TypeAllResponse:
+        return self.request(
+            f"https://{host}/type/all",
+            TypeAllResponse,
+            headers=headers,
+        )
+
+    def get_video_links(
         self,
         link: str,
         d: str,
