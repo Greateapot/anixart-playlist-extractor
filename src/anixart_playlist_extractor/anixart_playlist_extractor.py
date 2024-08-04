@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 from anixart_playlist_extractor.client import Client
 from anixart_playlist_extractor.enums import Quality
-from anixart_playlist_extractor.models import AnixartResponse
+from anixart_playlist_extractor.models import AnixartResponse, Playlist, PlaylistVideo
 from anixart_playlist_extractor.vlc_playlist_builder import build_playlist
 
 
@@ -19,19 +19,13 @@ class AnixartPlaylistExtractor:
         if response.code != 0:
             raise Exception(f"Got AnixartResponse with error code: {response.code}")
 
-    def get_video_link(
+    def get_video_location(
         self,
-        release_id: int,
-        source_id: int,
-        position: int,
+        url: str,
         *,
         quality: Quality = Quality.q720,
-    ) -> tuple[str, str]:
-        episode = self.client.episode(release_id, source_id, position)
-
-        self.assert_code(episode)
-
-        parse_result = urlparse(episode.episode.url)
+    ) -> str:
+        parse_result = urlparse(url)
 
         netloc = parse_result.netloc
         path = parse_result.path
@@ -59,7 +53,7 @@ class AnixartPlaylistExtractor:
             case Quality.q720:
                 video_link = video_links.links.field_720.Src
 
-        return (episode.episode.name, f"https:{video_link}")
+        return f"https:{video_link}"
 
     def extract_playlist(
         self,
@@ -90,37 +84,37 @@ class AnixartPlaylistExtractor:
 
         self.assert_code(episodes)
 
-        positions = map(
-            lambda episode: episode.position,
-            (
-                episodes.episodes[-1:]
-                if extract_last
-                else filter(
-                    lambda episode: episode.position in extract_only,
-                    episodes.episodes,
-                )
-                if extract_only
-                else episodes.episodes
-            ),
+        episodes = (
+            episodes.episodes[-1:]
+            if extract_last
+            else filter(
+                lambda episode: episode.position in extract_only,
+                episodes.episodes,
+            )
+            if extract_only
+            else episodes.episodes
         )
 
-        links = dict(
-            map(
-                lambda position: self.get_video_link(
-                    release_id,
-                    source_id,
-                    position,
-                    quality=quality,
-                ),
-                positions,
+        videos: list[PlaylistVideo] = []
+
+        for episode in episodes:
+            _episode = self.client.episode(release_id, source_id, episode.position)
+
+            self.assert_code(_episode)
+
+            videos.append(
+                PlaylistVideo(
+                    id=episode.position,
+                    title=episode.name,
+                    location=self.get_video_location(_episode.episode.url),
+                )
             )
-        )
 
         os.makedirs(output_dir, exist_ok=True)
         path = os.path.join(output_dir, f"{title}.xspf")
 
         with open(path, "w", encoding="utf-8") as file:
-            file.write(build_playlist(links, title))
+            file.write(build_playlist(Playlist(title=title, videos=videos)))
 
         print(f"Done! Output: {path}")
         ...

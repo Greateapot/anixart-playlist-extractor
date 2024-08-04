@@ -5,6 +5,17 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 
+class PlaylistVideo(BaseModel):
+    id: int
+    title: str
+    location: str
+
+
+class Playlist(BaseModel):
+    title: str
+    videos: list[PlaylistVideo]
+
+
 class Related(BaseModel):
     id: int
     name: str
@@ -222,6 +233,8 @@ def model_validate_json[ModelType: BaseModel](
 
 
 __all__ = (
+    PlaylistVideo,
+    Playlist,
     # Data
     Related,
     Category,
