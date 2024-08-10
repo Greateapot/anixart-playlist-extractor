@@ -25,6 +25,19 @@ class AnixartPlaylistExtractor:
         if response.code != 0:
             raise Exception(f"Got AnixartResponse with error code: {response.code}")
 
+    def clean_filename(
+        self,
+        filename: str,
+        *,
+        replace_char: str = "",
+    ) -> str:
+        illegal_chars = r'<>:"/\|?*'
+
+        for illegal_char in illegal_chars:
+            filename = filename.replace(illegal_char, replace_char)
+
+        return filename
+
     def get_location(
         self,
         url: str,
@@ -81,7 +94,6 @@ class AnixartPlaylistExtractor:
                 quality=quality,
             ),
         )
-        ...
 
     def get_playlist(
         self,
@@ -219,7 +231,7 @@ class AnixartPlaylistExtractor:
         )
 
         os.makedirs(output_dir, exist_ok=True)
-        path = os.path.join(output_dir, f"{playlist.title}.xspf")
+        path = os.path.join(output_dir, f"{self.clean_filename(playlist.title)}.xspf")
 
         with open(path, "w", encoding="utf-8") as file:
             file.write(build_playlist(playlist))
