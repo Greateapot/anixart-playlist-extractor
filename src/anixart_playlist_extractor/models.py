@@ -23,7 +23,7 @@ class Related(BaseModel):
     image: str | None
     images: Any  # TODO: obtain real type (list[str])
     name_ru: str | None
-    release_count: int
+    release_count: int | None
 
 
 class Category(BaseModel):
@@ -38,119 +38,119 @@ class Status(BaseModel):
 
 class Profile(BaseModel):
     id: int
-    login: str
-    avatar: str
-    ban_expires: int
+    login: str | None
+    avatar: str | None
+    ban_expires: int | None
     ban_reason: str | None
-    privilege_level: int
+    privilege_level: int | None
     badge_id: Any  # TODO: obtain real type (int)
     badge_name: Any  # TODO: obtain real type (str)
     badge_type: Any  # TODO: obtain real type (int)
     badge_url: Any  # TODO: obtain real type (str)
-    is_banned: bool
-    is_sponsor: bool
-    is_verified: bool
+    is_banned: bool | None
+    is_sponsor: bool | None
+    is_verified: bool | None
 
 
 class Comment(BaseModel):
     id: int
-    profile: Profile | int  # NOTE: jackson feature
-    message: str
-    timestamp: int
-    type: int
-    vote: int
-    release: Release | int  # NOTE: jackson feature
+    profile: Profile | int | None  # NOTE: jackson feature
+    message: str | None
+    timestamp: int | None
+    type: int | None
+    vote: int | None
+    release: Release | int | None  # NOTE: jackson feature
     parent_comment_id: int | None
-    vote_count: int
-    likes_count: int
-    is_spoiler: bool
-    is_edited: bool
-    is_deleted: bool
-    is_reply: bool
-    reply_count: int
-    can_like: bool
+    vote_count: int | None
+    likes_count: int | None
+    is_spoiler: bool | None
+    is_edited: bool | None
+    is_deleted: bool | None
+    is_reply: bool | None
+    reply_count: int | None
+    can_like: bool | None
 
 
 class VideoBanner(BaseModel):
     name: str
-    image: str
-    value: str
-    action_id: int
-    is_new: bool
+    image: str | None
+    value: str | None
+    action_id: int | None
+    is_new: bool | None
 
 
 class Release(BaseModel):
     field_id: int = Field(..., alias="@id")
     id: int
-    poster: str
-    image: str
+    poster: str | None
+    image: str | None
     year: str | None
-    genres: str
-    country: str
+    genres: str | None
+    country: str | None
     director: str | None
     author: str | None
     translators: str | None
-    studio: str
-    description: str
+    studio: str | None
+    description: str | None
     note: str | None
     related: Related | int | None  # NOTE: jackson feature]
     category: Category | int  # NOTE: jackson feature
-    rating: int
-    grade: float
+    rating: int | None
+    grade: float | None
     status: Status | None | int  # NOTE: jackson feature
-    duration: int
-    season: int
-    broadcast: int
-    screenshots: list[str]
+    duration: int | None
+    season: int | None
+    broadcast: int | None
+    screenshots: list[str] | None
     comments: list[Comment | int]  # NOTE: jackson feature
-    title_original: str
-    title_ru: str
+    title_original: str | None
+    title_ru: str | None
     title_alt: str | None
     episodes_released: int | None
     episodes_total: int | None
     release_date: str | None
-    vote_1_count: int
-    vote_2_count: int
-    vote_3_count: int
-    vote_4_count: int
-    vote_5_count: int
-    vote_count: int
-    creation_date: int
-    last_update_date: int
-    aired_on_date: int
-    favorites_count: int
-    watching_count: int
-    plan_count: int
-    completed_count: int
-    hold_on_count: int
-    dropped_count: int
-    is_adult: bool
-    is_play_disabled: bool
-    is_tpp_disabled: bool
-    can_video_appeal: bool
-    can_torlook_search: bool
-    is_deleted: bool
-    age_rating: int
+    vote_1_count: int | None
+    vote_2_count: int | None
+    vote_3_count: int | None
+    vote_4_count: int | None
+    vote_5_count: int | None
+    vote_count: int | None
+    creation_date: int | None
+    last_update_date: int | None
+    aired_on_date: int | None
+    favorites_count: int | None
+    watching_count: int | None
+    plan_count: int | None
+    completed_count: int | None
+    hold_on_count: int | None
+    dropped_count: int | None
+    is_adult: bool | None
+    is_play_disabled: bool | None
+    is_tpp_disabled: bool | None
+    can_video_appeal: bool | None
+    can_torlook_search: bool | None
+    is_deleted: bool | None
+    age_rating: int | None
     your_vote: int | None
-    related_count: int
-    comment_count: int
-    comments_count: int
-    collection_count: int
+    related_count: int | None
+    comment_count: int | None
+    comments_count: int | None
+    collection_count: int | None
     profile_list_status: int | None
-    status_id: int
-    last_view_timestamp: int
+    status_id: int | None
+    last_view_timestamp: int | None
     last_view_episode: int | None
-    is_viewed: bool
-    is_favorite: bool
-    is_view_blocked: bool
+    is_viewed: bool | None
+    is_favorite: bool | None
+    is_view_blocked: bool | None
     screenshot_images: list[str]
     related_releases: list[Release | int]  # NOTE: jackson feature
     recommended_releases: list[Release | int]  # NOTE: jackson feature
     episode_last_update: Any  # TODO: obtain real type (timestamp -> int)
-    comment_per_day_count: int
+    comment_per_day_count: int | None
     video_banners: list[VideoBanner | int]  # NOTE: jackson feature
-    profile_release_type_notification_preference_count: int
-    is_release_type_notifications_enabled: bool
+    profile_release_type_notification_preference_count: int | None
+    is_release_type_notifications_enabled: bool | None
 
 
 class Type(BaseModel):
@@ -159,18 +159,18 @@ class Type(BaseModel):
     name: str
     icon: str | None
     workers: str | None
-    is_sub: bool
-    episodes_count: int
-    view_count: int
-    pinned: bool
+    is_sub: bool | None
+    episodes_count: int | None
+    view_count: int | None
+    pinned: bool | None
 
 
 class Source(BaseModel):
     field_id: int = Field(..., alias="@id")
     id: int
-    type: Type | int  # NOTE: jackson feature
+    type: Type | int | None  # NOTE: jackson feature
     name: str
-    episodes_count: int
+    episodes_count: int | None
 
 
 class Episode(BaseModel):
@@ -180,10 +180,10 @@ class Episode(BaseModel):
     source: Source | int  # NOTE: jackson feature
     name: str
     url: str
-    iframe: bool
-    addedDate: int
-    is_filler: bool
-    is_watched: bool
+    iframe: bool | None
+    addedDate: int | None
+    is_filler: bool | None
+    is_watched: bool | None
 
 
 class LinksField(BaseModel):
